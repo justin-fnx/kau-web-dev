@@ -5,8 +5,13 @@ import com.example.kaushop.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -21,8 +26,25 @@ public class ProductController {
     public ResponseEntity<Product> getProduct(
             @PathVariable("productId") long productId
     ) {
-        Product product = productService.getProduct(productId);
+        Optional<Product> optProduct = productService.getProduct(productId);
 
-        return ResponseEntity.ok(product);
+        if(optProduct.isPresent()) {
+            return ResponseEntity.ok(optProduct.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
+
+    @PostMapping("/v1/product")
+    public ResponseEntity createProduct(
+            @RequestBody Product product
+    ) {
+        product.setId(null);
+
+        Product newProduct = productService.createProduct(product);
+        URI newProductUri = URI.create("/api/v1/product/" + newProduct.getId());
+
+        return ResponseEntity.created(newProductUri).build();
+    }
+
 }
