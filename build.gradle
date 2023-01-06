@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.0.1'
     id 'io.spring.dependency-management' version '1.1.0'
+    id 'com.google.cloud.tools.jib' version '3.1.4'
 }
 
 group = 'com.example'
@@ -29,4 +30,9 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+jib {
+    from.image = 'openjdk:17-alpine'
+    to.image = 'kaushop:0.0.1'
 }
