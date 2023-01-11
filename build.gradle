@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 sourceCompatibility = '17'
 
 configurations {
@@ -22,6 +22,7 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
@@ -34,5 +35,5 @@ tasks.named('test') {
 
 jib {
     from.image = 'openjdk:17-alpine'
-    to.image = 'kaushop:0.0.1'
+    to.image = '367178254166.dkr.ecr.ap-northeast-2.amazonaws.com/2002122067-product:0.0.2'
 }
