@@ -16,6 +16,10 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
+    public Iterable<Product> getProducts() {
+        return productRepository.findAll();
+    }
+
     public Product createProduct(Product product) {
         return productRepository.save(product);
     }
@@ -27,16 +31,13 @@ public class ProductService {
         }
 
         Product product = optProduct.get();
-
         if(product.getStock() + stockChanged < 0) {
             return false;
         }
-
         product.setStock(product.getStock() + stockChanged);
 
         try {
             productRepository.save(product);
-
             return true;
         } catch(Exception e) {
             return false;

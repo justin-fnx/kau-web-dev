@@ -16,21 +16,28 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MessageReceiver {
     private final ProductService productService;
+    private final MessageSender messageSender;
     private final ObjectMapper mapper;
 
     @SqsListener(value = "200212206-stock-queue", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS )
     public void receiveStringMessage(@Payload String payload,
+                                     @Header("tid") String tid,
                                      @Header("phase") String phase) throws Exception {
 
         if(phase.equals(TransactionPhase.TRY.getType())) {
             StockMessageDto stockMessage = mapper.readValue(payload, StockMessageDto.class);
-            if(!productService.addStock(stockMessage.getProductId(), stockMessage.getStockChanged())) {
-                throw new Exception("Not enough stock!");
+            boolean changeResult = productService.addStock(stockMessage.getProductId(), stockMessage.getStockChanged());
+
+            try {
+                if (!changeResult) {
+                    messageSender.sendAck(tid, TransactionPhase.CANCEL);
+                } else {
+                    messageSender.sendAck(tid, TransactionPhase.CONFIRM);
+                }
+            } catch(Exception e) {
+                // 메시지 처리 실패시 재고 원복
+                productService.addStock(stockMessage.getProductId(), stockMessage.getStockChanged() * -1);
             }
-        } else if(phase.equals(TransactionPhase.CONFIRM.getType())) {
-            // do something later
-        } else if(phase.equals(TransactionPhase.CANCEL.getType())) {
-            // do something later
         } else {
 
         }
