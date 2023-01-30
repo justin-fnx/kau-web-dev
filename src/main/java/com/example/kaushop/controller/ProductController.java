@@ -35,6 +35,11 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/v1/products")
+    public ResponseEntity<Iterable<Product>> getProducts() {
+        return ResponseEntity.ok(productService.getProducts());
+    }
+
     @PostMapping("/v1/product")
     public ResponseEntity createProduct(
             @RequestBody Product product
