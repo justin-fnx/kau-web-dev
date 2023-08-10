@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: product-virtualservice
+spec:
+  hosts:
+    - "k8s-istiosys-ingressa-d8bb4db6a1-79597993.ap-northeast-2.elb.amazonaws.com"
+  gateways:
+    - product-gateway
+    - mesh
+  http:
+    - match:
+        - uri:
+            prefix: /2002122067/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: product-service
+            port:
+              number: 80

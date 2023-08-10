@@ -35,5 +35,5 @@ tasks.named('test') {
 
 jib {
     from.image = 'openjdk:17-alpine'
-    to.image = '367178254166.dkr.ecr.ap-northeast-2.amazonaws.com/2002122067-product:0.0.2'
+    to.image = '694030593525.dkr.ecr.ap-northeast-2.amazonaws.com/2002122067-product:0.0.2'
 }

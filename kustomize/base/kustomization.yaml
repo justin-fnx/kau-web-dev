@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configMapGenerator:
+  - name: tag-config-map
+    envs:
+      - .env
+replacements:
+  - source:
+      kind: ConfigMap
+      name: tag-config-map
+      fieldPath: data.KUSTOMIZE_IMAGE_TAG
+    targets:
+      - select:
+          kind: Deployment
+        fieldPaths:
+          - spec.template.spec.containers.[name=product].image
+        options:
+          delimiter: ":"
+          index: 1
+resources:
+  - deployment.yaml
+  - service.yaml
+  - gateway.yaml
+  - virtualservice.yaml
+namespace: ns2002122067
+commonLabels:
+  app: product
