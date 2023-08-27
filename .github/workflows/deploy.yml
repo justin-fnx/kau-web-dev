@@ -1,0 +1,56 @@
+name: Deploy k8s
+
+on:
+  workflow_run:
+    workflows: [Release k8s]
+    types: [completed]
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+
+permissions:
+  id-token: write
+  contents: write
+  actions: write
+  issues: write
+
+env:
+  EKS_CLUSTER: web-dev-class
+  ECR_REPOSITORY: 2002122067-product
+  AWS_REGION: ap-northeast-2
+  AWS_ACCOUNT: 694030593525
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ap-northeast-2
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/GithubActionsRole
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+      - name: Install and configure kubectl
+        run: |
+          curl --silent -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.22.6/2022-03-09/bin/linux/amd64/kubectl
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --short --client
+          aws eks update-kubeconfig --name $EKS_CLUSTER --region $AWS_REGION
+
+      - name: Kubectl apply
+        run:  |
+          echo "KUSTOMIZE_IMAGE_TAG" >> ./kustomize/base/.env
+          KUSTOMIZE_IMAGE_TAG=${{ inputs.version }} kubectl apply -k ./kustomize/base/
